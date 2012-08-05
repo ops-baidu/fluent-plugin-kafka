@@ -1,4 +1,0 @@
-module Fluent
-  class KafkaOutput < Fluent::BufferedOutput
-  end
-end
