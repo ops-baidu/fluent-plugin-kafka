@@ -1,6 +1,7 @@
 # Fluent::Plugin::Kafka
 
 TODO: Write a gem description
+TODO: Also, I need to write tests
 
 ## Installation
 
