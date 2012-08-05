@@ -66,20 +66,20 @@ class KafkaInput < Input
     def consume
       es = MultiEventStream.new
       @consumer.consume.each { |msg|
-      begin
-        # TODO: ask upstream for conversion
-        # i.e., it should be msg.to_hash or something
-        msg_record = {
-          :magic => msg.magic,
-          :checksum => msg.checksum,
-          :payload => msg.payload
-        }
-        $log.info msg_record.to_s
-        es.add(Time.now.to_i, msg_record)
-      rescue
-        $log.warn msg_record.to_s, :error=>$!.to_s
-        $log.debug_backtrace
-      end
+        begin
+          # TODO: ask upstream for conversion
+          # i.e., it should be msg.to_hash or something
+          msg_record = {
+            :magic => msg.magic,
+            :checksum => msg.checksum,
+            :payload => msg.payload
+          }
+          $log.info msg_record.to_s
+          es.add(Time.now.to_i, msg_record)
+        rescue
+          $log.warn msg_record.to_s, :error=>$!.to_s
+          $log.debug_backtrace
+        end
       }
 
       unless es.empty?
