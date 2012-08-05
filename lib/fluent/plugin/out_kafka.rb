@@ -8,7 +8,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   config_param :host, :string, :default => 'localhost'
   config_param :port, :integer, :default => 9092
-  config_param :default_topic, :string
+  config_param :default_topic, :string, :default => nil
 
   def configure(conf)
     super
@@ -34,7 +34,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   def write(chunk)
     records_by_topic = {}
     chunk.msgpack_each { |tag, time, record|
-      topic = record['topic'] || self.default_topic
+      topic = record['topic'] || self.default_topic || tag
       message = Kafka::Message.new(record.to_s)
       records_by_topic[topic] ||= []
       records_by_topic[topic] << message
