@@ -9,10 +9,11 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   config_param :host, :string, :default => 'localhost'
   config_param :port, :integer, :default => 9092
   config_param :default_topic, :string, :default => nil
+  config_param :default_partition, :integer, :default => 0
 
   def configure(conf)
     super
-    @producers = {} # keyed by partition:topic
+    @producers = {} # keyed by topic:partition
   end
 
   def start
@@ -31,22 +32,28 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
     records_by_topic = {}
     chunk.msgpack_each { |tag, time, record|
       topic = record['topic'] || self.default_topic || tag
+      partition = record['partition'] || self.default_partition
       message = Kafka::Message.new(record.to_s)
       records_by_topic[topic] ||= []
-      records_by_topic[topic] << message
+      records_by_topic[topic][partition] ||= []
+      records_by_topic[topic][partition] << message
     }
     publish(records_by_topic)
   end
 
   def publish(records_by_topic)
-    records_by_topic.each { |topic, messages|
-      config = {
-        :port  => self.port,
-        :host  => self.host,
-        :topic => topic
+    records_by_topic.each { |topic, partitions|
+      partitions.each_with_index { |messages, partition|
+        next if not messages
+        config = {
+          :port      => self.port,
+          :host      => self.host,
+          :topic     => topic,
+          :partition => partition
+        }
+        producer = @producers[topic] || Kafka::Producer.new(config)
+        producer.send(messages)
       }
-      producer = @producers[topic] || Kafka::Producer.new(config)
-      producer.send(messages)
     }
   end
 end
