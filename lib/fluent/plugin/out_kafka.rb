@@ -13,10 +13,6 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   def configure(conf)
     super
     @producers = {} # keyed by partition:topic
-    @kafka_config = {
-      :port => self.port,
-      :host => self.host
-    }
   end
 
   def start
@@ -44,7 +40,12 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   def publish(records_by_topic)
     records_by_topic.each { |topic, messages|
-      producer = @producers[topic] || Kafka::Producer.new(@kafka_config) 
+      config = {
+        :port  => self.port,
+        :host  => self.host,
+        :topic => topic
+      }
+      producer = @producers[topic] || Kafka::Producer.new(config)
       producer.send(messages)
     }
   end
