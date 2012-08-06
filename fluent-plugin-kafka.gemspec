@@ -2,9 +2,9 @@
 
 Gem::Specification.new do |gem|
   gem.authors       = ["kiyoto"]
-  gem.email         = ["kiyoto@treasure-data.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.email         = ["me@ktamura.com"]
+  gem.description   = %q{Fluentd plugin for Apache Kafka}
+  gem.summary       = %q{Fluentd plugin for Apache Kafka}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
