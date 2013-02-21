@@ -51,8 +51,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
           :topic     => topic,
           :partition => partition
         }
-        producer = @producers[topic] || Kafka::Producer.new(config)
-        producer.send(messages)
+        @producers[topic] ||= Kafka::Producer.new(config)
+        @producers[topic].send(messages)
       }
     }
   end
