@@ -1,3 +1,8 @@
+# add zookeeper support
+push logs to kafka through zookeeper.
+use kafka-rb of https://github.com/ops-baidu/kafka-rb.git
+jiuze#baidu.com
+
 # Fluent::Plugin::Kafka
 
 TODO: Write a gem description

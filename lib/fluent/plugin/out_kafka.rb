@@ -27,7 +27,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
     @producers = {} # keyed by topic:partition
 #####################################
     if @need_platform_info
-      @platform = "Aqueducts"
+      @platform = "aqueducts"
 =begin require 'nodes'
       im_nodes = Nodes.new()
       result = im_nodes.search_tags(@host_local.split(".baidu.com")[0])
@@ -90,7 +90,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
             :partition => partition
           }
           @producers[topic] ||= Kafka::ZKProducer.new(config)
-          @producers[topic].zkpush(messages)
+          @producers[topic].push(messages)
         elsif @host and @port
           config = {
             :port      => @port,
