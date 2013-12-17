@@ -5,3 +5,4 @@ gemspec
 
 gem "rake"
 gem "kafka-rb"
+gem "rest-client"

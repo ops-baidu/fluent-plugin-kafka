@@ -4,46 +4,56 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   def initialize
     super
     require 'kafka'
-
-#extra info feature,added by liyong
-    require 'socket'
-    @host_local = Socket.gethostname
-    @ip_local = Socket::getaddrinfo(@host_local, Socket::SOCK_STREAM)[0][3]
-    @idc = @host_local.split("-")[0]
-####################################
-
   end
 
-  config_param :host, :string, :default => 'localhost'
-  config_param :port, :integer, :default => 9092
-  config_param :zkhost, :string, :default => nil
-  config_param :zkport, :integer, :default => nil
-  config_param :default_topic, :string, :default => nil
-  config_param :default_partition, :integer, :default => 0
-  config_param :need_platform_info, :bool, :default => false
+  config_param :product, :string, :default => nil
+  config_param :service, :string, :default => nil
+
+  config_param :host, :string, :default => "buffer.aqueducts.baidu.com"
+  config_param :port, :integer, :default => 2181
 
   def configure(conf)
     super
     @producers = {} # keyed by topic:partition
-#####################################
-    if @need_platform_info
-      @platform = "aqueducts"
-=begin require 'nodes'
-      im_nodes = Nodes.new()
-      result = im_nodes.search_tags(@host_local.split(".baidu.com")[0])
-      if result["status"] != 0
-        @platform = ""
-      else
-        mid_array = result["data"]["tags"]
-        platform_list = mid_array.select{|x| x[0] == "PLATFORM"}
-        platform_list.each do |y|
-          @platform = /[A-Za-z]+[0-9]+/.match(y[1]).to_s
-          break if @platform != ''
-        end
-      end
-=end
+
+####################################
+    @default_topic = "#{@product}_#{@service}_topic"
+    @default_partition = 0
+
+    unless @host and @port
+      $log.error "==========================================================="
+      $log.error "|| host and port must be given."
+      $log.error "==========================================================="
+      exit 1
     end
+
+    require 'socket'
+    @host_local = Socket.gethostname
+    @ip_local = Socket::getaddrinfo(@host_local, Socket::SOCK_STREAM)[0][3]
+    @idc = @host_local.split("-")[0]
+
+    unless check(@product, @service)
+      $log.error "==========================================================="
+      $log.error "|| please sign up frist. http://aqueduct.baidu.com"
+      $log.error "==========================================================="
+      exit 1
+    else
+      $log.info "==========================================================="
+      $log.info "|| product = #{@product}"
+      $log.info "|| service = #{@service}"
+      $log.info "|| topic = #{@default_topic}"
+      $log.info "|| partition = #{@default_partition}"
+      $log.info "==========================================================="
+    end
+
 ######################################
+  end
+
+  def check(product, service)
+    require 'rest-client'
+#    response = RestClient.get 'http://aqueducts.baidu.com.com/validation/', {:params => {:product => product, 'service' => service}}
+
+    return true;
   end
 
   def start
@@ -61,14 +71,13 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   def write(chunk)
     records_by_topic = {}
     chunk.msgpack_each { |tag, time, record|
-      topic = record['topic'] || self.default_topic || tag
-      partition = record['partition'] || self.default_partition
-#extra info feature,added by liyong
+      topic = record['topic'] || @default_topic || tag
+      partition = record['partition'] || @default_partition
+
       record["hostname"] = @host_local
       record["localip"] = @ip_local
       record["idc"] = @idc
-      record["platform"] = @platform  if @need_platform_info
-###################################
+
       require 'json'
       message = Kafka::Message.new(record.to_json)
       records_by_topic[topic] ||= []
@@ -82,27 +91,14 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
     records_by_topic.each { |topic, partitions|
       partitions.each_with_index { |messages, partition|
         next if not messages
-        if @zkhost and @zkport
-          config = {
-            :port      => @zkport,
-            :host      => @zkhost,
-            :topic     => topic,
-            :partition => partition
-          }
-          @producers[topic] ||= Kafka::ZKProducer.new(config)
-          @producers[topic].push(messages)
-        elsif @host and @port
-          config = {
-            :port      => @port,
-            :host      => @host,
-            :topic     => topic,
-            :partition => partition
-          }
-          @producers[topic] ||= Kafka::Producer.new(config)
-          @producers[topic].push(messages)
-        else
-          puts "host or port argument is nil"
-        end
+        config = {
+          :port      => @port,
+          :host      => @host,
+          :topic     => topic,
+          :partition => partition
+        }
+        @producers[topic] ||= Kafka::ZKProducer.new(config)
+        @producers[topic].push(messages)
       }
     }
   end
