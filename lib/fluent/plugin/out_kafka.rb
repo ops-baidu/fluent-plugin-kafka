@@ -50,7 +50,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   end
 
   def check(product, service)
-    require 'rest-client'
+#    require 'rest-client'
 #    response = RestClient.get 'http://aqueducts.baidu.com.com/validation/', {:params => {:product => product, 'service' => service}}
 
     return true;
@@ -77,6 +77,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
       record["hostname"] = @host_local
       record["localip"] = @ip_local
       record["idc"] = @idc
+      record["event_time"] = Time.now.to_f.to_s
 
       require 'json'
       message = Kafka::Message.new(record.to_json)
