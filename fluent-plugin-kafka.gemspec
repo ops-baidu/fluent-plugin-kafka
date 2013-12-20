@@ -15,4 +15,5 @@ Gem::Specification.new do |gem|
   gem.version = '0.0.1'
   gem.add_dependency 'fluentd'
   gem.add_dependency 'kafka-rb'
+  gem.add_dependency 'rest-client'
 end

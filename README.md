@@ -1,3 +1,28 @@
+## add zookeeper support
+
+- push logs to kafka through zookeeper.
+- use kafka-rb of https://github.com/ops-baidu/kafka-rb.git
+- jiuze#baidu.com
+
+## config example
+
+    <match kafka.*.*>
+      # plugin type (requried)
+      type kafka
+    
+      # product & service (requried)
+      product aqueducts
+      service astream
+    
+      # buffer config (only requried in development mode, defalut value is ok for production.)
+      host 192.168.1.20
+      port 2181
+    
+      # interval (optional, but it may affect the latency.)
+      flush_interval 1s
+    </match>
+
+
 # Fluent::Plugin::Kafka
 
 TODO: Write a gem description
