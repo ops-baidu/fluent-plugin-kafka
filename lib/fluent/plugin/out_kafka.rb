@@ -1,3 +1,8 @@
+class Array
+  def has_service(service)
+    self.select { |el| el["name"] == "#{service}" } != []
+  end
+end
 class Fluent::KafkaOutput < Fluent::BufferedOutput
   Fluent::Plugin.register_output('kafka', self)
 
@@ -11,6 +16,9 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   config_param :host, :string, :default => "buffer.aqueducts.baidu.com"
   config_param :port, :integer, :default => 2181
+
+  config_param :apidomain, :string, :default => "api.aqueducts.baidu.com"
+  config_param :skip_check, :string, :default => "false"
 
   def configure(conf)
     super
@@ -50,10 +58,14 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   end
 
   def check(product, service)
-#    require 'rest-client'
-#    response = RestClient.get 'http://aqueducts.baidu.com.com/validation/', {:params => {:product => product, 'service' => service}}
+    require 'rest-client'
+    require 'json'
 
-    return true;
+    response = RestClient.get "http://#{@apidomain}:/v1/products/#{product}/services"
+    @services = JSON.parse(response)
+    return true if @services.has_service("#{service}") 
+    return true if @skip_check == "true"
+    return false
   end
 
   def start
