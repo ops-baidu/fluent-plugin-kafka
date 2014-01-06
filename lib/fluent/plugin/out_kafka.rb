@@ -100,8 +100,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
     zk = Zookeeper.new("#{zkhost}:#{zkport}")
     zk.get_children(:path => "/brokers/ids")[:children].each do |ids|
       broker_meta = zk.get(:path => "/brokers/ids/#{ids}")[:data]
-      broker_meta_in_json = JSON.parse(brker_meta)
-      @brokers << broker_meta_in_json["host"]
+      broker_meta_in_json = JSON.parse(broker_meta)
+      brokers << broker_meta_in_json["host"] + ":" + broker_meta_in_json["port"].to_s
     end
     zk.close
     return brokers
