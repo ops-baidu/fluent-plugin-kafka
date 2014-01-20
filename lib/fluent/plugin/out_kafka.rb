@@ -85,7 +85,7 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
       record["hostname"] = @host_local
       record["localip"] = @ip_local
       record["idc"] = @idc
-      record["event_time"] = Time.now.to_f.to_s
+      record["event_time"] = Time.now.to_f * 1000
 
       #messages <<  Poseidon::MessageToSend.new(topic, record.to_json, "opt_key")
       messages <<  Poseidon::MessageToSend.new(@default_topic, record.to_json)
