@@ -8,7 +8,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   def initialize
     super
-    require 'kafka'
+    require 'poseidon'
+    require 'json'
   end
 
   config_param :product, :string, :default => nil
@@ -22,11 +23,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   def configure(conf)
     super
-    @producers = {} # keyed by topic:partition
-
 ####################################
     @default_topic = "#{@product}_#{@service}_topic"
-    @default_partition = 0
 
     unless @host and @port
       $log.error "==========================================================="
@@ -50,7 +48,6 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
       $log.info "|| product = #{@product}"
       $log.info "|| service = #{@service}"
       $log.info "|| topic = #{@default_topic}"
-      $log.info "|| partition = #{@default_partition}"
       $log.info "==========================================================="
     end
 
@@ -59,20 +56,22 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
   def check(product, service)
     require 'rest-client'
-    require 'json'
 
     response = RestClient.get "http://#{@apidomain}:/v1/products/#{product}/services"
     @services = JSON.parse(response)
-    return true if @services.has_service("#{service}") 
+    return true if @services.has_service("#{service}")
     return true if @skip_check == "true"
     return false
   end
 
   def start
     super
+    brokers = get_brokers_from_zk(@host, @port)
+    @producer = Poseidon::Producer.new(brokers, @host_local)
   end
 
   def shutdown
+    @producer = nil
     super
   end
 
@@ -81,38 +80,30 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   end
 
   def write(chunk)
-    records_by_topic = {}
+    messages = []
     chunk.msgpack_each { |tag, time, record|
-      topic = record['topic'] || @default_topic || tag
-      partition = record['partition'] || @default_partition
-
       record["hostname"] = @host_local
       record["localip"] = @ip_local
       record["idc"] = @idc
-      record["event_time"] = Time.now.to_f.to_s
+      record["event_time"] = (Time.now.to_f * 1000).to_i
 
-      require 'json'
-      message = Kafka::Message.new(record.to_json)
-      records_by_topic[topic] ||= []
-      records_by_topic[topic][partition] ||= []
-      records_by_topic[topic][partition] << message
+      #messages <<  Poseidon::MessageToSend.new(topic, record.to_json, "opt_key")
+      messages <<  Poseidon::MessageToSend.new(@default_topic, record.to_json)
     }
-    publish(records_by_topic)
+    @producer.send_messages(messages)
   end
 
-  def publish(records_by_topic)
-    records_by_topic.each { |topic, partitions|
-      partitions.each_with_index { |messages, partition|
-        next if not messages
-        config = {
-          :port      => @port,
-          :host      => @host,
-          :topic     => topic,
-          :partition => partition
-        }
-        @producers[topic] ||= Kafka::ZKProducer.new(config)
-        @producers[topic].push(messages)
-      }
-    }
+  def get_brokers_from_zk(zkhost, zkport)
+    require 'zookeeper'
+
+    brokers = []
+    zk = Zookeeper.new("#{zkhost}:#{zkport}")
+    zk.get_children(:path => "/brokers/ids")[:children].each do |ids|
+      broker_meta = zk.get(:path => "/brokers/ids/#{ids}")[:data]
+      broker_meta_in_json = JSON.parse(broker_meta)
+      brokers << broker_meta_in_json["host"] + ":" + broker_meta_in_json["port"].to_s
+    end
+    zk.close
+    return brokers
   end
 end
