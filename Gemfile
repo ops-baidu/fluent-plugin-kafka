@@ -4,5 +4,6 @@ source 'http://ruby.taobao.org'
 gemspec
 
 gem "rake"
-gem "kafka-rb"
+gem "poseidon"
 gem "rest-client"
+gem "zookeeper"
