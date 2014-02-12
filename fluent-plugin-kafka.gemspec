@@ -15,5 +15,6 @@ Gem::Specification.new do |gem|
   gem.version = '0.0.2'
   gem.add_dependency 'fluentd'
   gem.add_dependency 'poseidon'
+  gem.add_dependency 'zookeeper'
   gem.add_dependency 'rest-client'
 end
