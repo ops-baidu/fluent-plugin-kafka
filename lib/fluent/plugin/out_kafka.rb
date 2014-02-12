@@ -55,12 +55,13 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   end
 
   def check(product, service)
+    return true if @skip_check == "true"
+
     require 'rest-client'
 
     response = RestClient.get "http://#{@apidomain}:/v1/products/#{product}/services"
     @services = JSON.parse(response)
     return true if @services.has_service("#{service}")
-    return true if @skip_check == "true"
     return false
   end
 
