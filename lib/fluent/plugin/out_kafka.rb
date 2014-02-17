@@ -23,6 +23,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
 
     require 'socket'
     @host_local = Socket.gethostname
+    @ip_local = Socket::getaddrinfo(@host_local, Socket::SOCK_STREAM)[0][3]
+    @idc_local = @host_local.split("-")[0]
 
 ######################################
   end
@@ -49,6 +51,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
       topic_name = "#{record["product"]}_#{record["service"]}_topic"
 
       record["collector_host"] = @host_local
+      record["collector_idc"] = @idc_local
+      record["collector_ip"] = @ip_local
       record["collector_time"] = (Time.now.to_f * 1000).to_i
 
       #messages <<  Poseidon::MessageToSend.new(topic, record.to_json, "opt_key")

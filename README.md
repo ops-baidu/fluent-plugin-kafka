@@ -1,6 +1,9 @@
 ## branch for astream collector
 
-- depend on customize [out_forward.rb](https://gist.github.com/castomer/9043610)
+- depend on customize [out_forward.rb](https://gist.github.com/castomer/9043610);
+- fluent-plugin-kafka version 0.0.1 -> support kafka 0.72;
+- fluent-plugin-kafka version 0.0.2 -> support kafka 0.8;
+- fluent-plugin-kafka version 0.0.3 -> used as log collector.
 
 
 ## add zookeeper support
