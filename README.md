@@ -1,7 +1,12 @@
+## branch for astream collector
+
+- depend on customize (out_forward.rb)[https://gist.github.com/castomer/9043610]
+
+
 ## add zookeeper support
 
 - push logs to kafka through zookeeper.
-- use kafka-rb of https://github.com/ops-baidu/kafka-rb.git
+- using poseidon
 - jiuze#baidu.com
 
 ## config example

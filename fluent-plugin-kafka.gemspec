@@ -3,7 +3,7 @@
 Gem::Specification.new do |gem|
   gem.authors       = ["kiyoto", "dongfang qu"]
   gem.email         = ["me@ktamura.com"]
-  gem.description   = %q{Fluentd plugin for Apache Kafka}
+  gem.description   = %q{Fluentd plugin for Apache Kafka, work as astream collector}
   gem.summary       = %q{Fluentd plugin for Apache Kafka 0.8}
   gem.homepage      = "https://github.com/ops-baidu/fluent-plugin-kafka"
 
