@@ -1,6 +1,6 @@
 ## branch for astream collector
 
-- depend on customize (out_forward.rb)[https://gist.github.com/castomer/9043610]
+- depend on customize [out_forward.rb](https://gist.github.com/castomer/9043610)
 
 
 ## add zookeeper support
