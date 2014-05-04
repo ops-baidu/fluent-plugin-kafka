@@ -32,7 +32,8 @@ class Fluent::KafkaOutput < Fluent::BufferedOutput
   def start
     super
     brokers = get_brokers_from_zk(@host, @port)
-    @producer = Poseidon::Producer.new(brokers, @host_local)
+    options = {:type => :async, :required_acks => 0, :max_send_retries => 3}
+    @producer = Poseidon::Producer.new(brokers, @host_local, options)
   end
 
   def shutdown
