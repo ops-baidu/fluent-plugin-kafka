@@ -5,5 +5,4 @@ gemspec
 
 gem "rake"
 gem "poseidon"
-gem "rest-client"
 gem "zookeeper"

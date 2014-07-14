@@ -1,7 +1,15 @@
+## branch for astream collector
+
+- depend on customize [out_forward.rb](https://gist.github.com/castomer/9043610);
+- fluent-plugin-kafka version 0.0.1 -> support kafka 0.72;
+- fluent-plugin-kafka version 0.0.2 -> support kafka 0.8;
+- fluent-plugin-kafka version 0.0.3 -> used as log collector.
+
+
 ## add zookeeper support
 
 - push logs to kafka through zookeeper.
-- use kafka-rb of https://github.com/ops-baidu/kafka-rb.git
+- using poseidon
 - jiuze#baidu.com
 
 ## config example

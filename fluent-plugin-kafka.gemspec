@@ -3,7 +3,7 @@
 Gem::Specification.new do |gem|
   gem.authors       = ["kiyoto", "dongfang qu"]
   gem.email         = ["me@ktamura.com"]
-  gem.description   = %q{Fluentd plugin for Apache Kafka}
+  gem.description   = %q{Fluentd plugin for Apache Kafka, work as astream collector}
   gem.summary       = %q{Fluentd plugin for Apache Kafka 0.8}
   gem.homepage      = "https://github.com/ops-baidu/fluent-plugin-kafka"
 
@@ -12,9 +12,8 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "fluent-plugin-kafka"
   gem.require_paths = ["lib"]
-  gem.version = '0.0.2'
+  gem.version = '0.0.3'
   gem.add_dependency 'fluentd'
   gem.add_dependency 'poseidon'
   gem.add_dependency 'zookeeper'
-  gem.add_dependency 'rest-client'
 end
